@@ -89,15 +89,15 @@ class Atlas(nn.Module):
 
     @torch.no_grad()
     def _retrieve(
-        self,
-        index,
-        topk,
-        query,
-        query_ids_retriever,
-        query_mask_retriever,
-        batch_metadata=None,
-        filtering_fun=None,
-        iter_stats={},
+            self,
+            index,
+            topk,
+            query,
+            query_ids_retriever,
+            query_mask_retriever,
+            batch_metadata=None,
+            filtering_fun=None,
+            iter_stats={},
     ):
         self.retriever.eval()
         if len(query) > 0:
@@ -119,15 +119,15 @@ class Atlas(nn.Module):
 
     @torch.no_grad()
     def retrieve_with_rerank(
-        self,
-        index,
-        topk,
-        query,
-        query_ids_retriever,
-        query_mask_retriever,
-        batch_metadata=None,
-        filtering_fun=None,
-        iter_stats={},
+            self,
+            index,
+            topk,
+            query,
+            query_ids_retriever,
+            query_mask_retriever,
+            batch_metadata=None,
+            filtering_fun=None,
+            iter_stats={},
     ):
         bsz = len(query)
         to_rerank = self.opt.n_to_rerank_with_retrieve_with_rerank
@@ -251,7 +251,7 @@ class Atlas(nn.Module):
             return None, None, None
 
         assert (
-            target_tokens is None or self.opt.decoder_prompt_format is None
+                target_tokens is None or self.opt.decoder_prompt_format is None
         ), "decoder_prompt_format not compatible with target tokenized in iterator"
 
         query_enc = self.retriever_tokenize(query) if not self.opt.use_file_passages else None
@@ -397,17 +397,17 @@ class Atlas(nn.Module):
         return gold_score
 
     def forward(
-        self,
-        index,
-        query,
-        target,
-        target_tokens=None,
-        passages=None,
-        batch_metadata=None,
-        filtering_fun=None,
-        use_cache=False,
-        train_retriever=False,
-        iter_stats={},
+            self,
+            index,
+            query,
+            target,
+            target_tokens=None,
+            passages=None,
+            batch_metadata=None,
+            filtering_fun=None,
+            use_cache=False,
+            train_retriever=False,
+            iter_stats={},
     ):
         forward_start = time.time()
         bsz = len(query)
@@ -473,7 +473,7 @@ class Atlas(nn.Module):
                 )
             elif "loop" in self.opt.gold_score_mode:
                 gold_score = self.loop_score(reader_ids, reader_mask, decoder_input_ids, labels, cfg, bsz)
-            elif "ppmean" in self.opt.gold_score_mode:
+            elif "ppmean" in self.opt.gold_score_mode or "pdist" in self.opt.gold_score_mode:
                 gold_score = self.perplexity_score(reader_ids, reader_mask, decoder_input_ids, labels, cfg, bsz)
             elif "emdr" in self.opt.gold_score_mode:
                 gold_score = self.emdr_score(reader_ids, reader_mask, decoder_input_ids, labels, cfg, bsz)

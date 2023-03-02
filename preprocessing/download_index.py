@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
+import multiprocessing
 
 from download_tools import get_download_path, get_s3_path, maybe_download_file
 
@@ -66,17 +67,27 @@ def get_embedding_path(index, shard_number):
     return f"{index}/{embedding_filename}"
 
 
-def main(output_directory, requested_index):
-    for shard in range(N_SHARDS):
-        passage_path = get_passage_path(requested_index, shard)
-        source = get_s3_path(passage_path)
-        target = get_download_path(output_directory, passage_path)
-        maybe_download_file(source, target)
+def download_passage_and_embedding(shard, output_directory, requested_index):
+    passage_path = get_passage_path(requested_index, shard)
+    source = get_s3_path(passage_path)
+    target = get_download_path(output_directory, passage_path)
+    maybe_download_file(source, target)
 
-        embedding_path = get_embedding_path(requested_index, shard)
-        source = get_s3_path(embedding_path)
-        target = get_download_path(output_directory, embedding_path)
-        maybe_download_file(source, target)
+    embedding_path = get_embedding_path(requested_index, shard)
+    source = get_s3_path(embedding_path)
+    target = get_download_path(output_directory, embedding_path)
+    maybe_download_file(source, target)
+
+
+def main(output_directory, requested_index):
+    # Parallelize the download
+    pool = multiprocessing.Pool(processes=32)
+
+    # Download the passages and embeddings
+    pool.starmap(
+        download_passage_and_embedding,
+        [(shard, output_directory, requested_index) for shard in range(N_SHARDS)],
+    )
 
 
 if __name__ == "__main__":
